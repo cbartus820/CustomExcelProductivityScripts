@@ -1,0 +1,478 @@
+Sub Format_Dates()
+
+'This macro formats all columns in every sheet of the active workbook that have "Date" in their header to the "MM/DD/YYYY" format.
+
+    Dim Sheet_Range As Range
+    
+    ' Loop through every worksheet in the active workbook
+    For i = 1 To ActiveWorkbook.Worksheets.Count
+    
+        ' Loop through every column in the first row of the worksheet
+        For X = 1 To WorksheetFunction.CountA(Sheets(i).Range("1:1"))
+        
+            ' Check if the column header contains "Date"
+            If InStr(Sheets(i).Cells(1, X).Value, "Date") > 0 Then
+                
+                ' Format the entire column to "MM/DD/YYYY"
+                Sheets(i).Cells(1, X).EntireColumn.NumberFormat = "MM/DD/YYYY"
+                
+            End If
+        Next X
+    Next i
+
+End Sub
+
+
+
+Sub Custom_Formatting_Tools_Autofit_Cols()
+
+' Declare variables
+Dim Sheet As Worksheet
+Dim Workbook As Workbook
+Dim WorksheetCount As Integer
+
+' Set reference to active workbook
+Set Workbook = ActiveWorkbook
+
+' Count number of worksheets in workbook
+WorksheetCount = Workbook.Worksheets.Count
+
+' Loop through each worksheet and autofit columns and rows
+For i = 1 To WorksheetCount
+    Sheets(i).Columns.AutoFit
+    Sheets(i).Rows.AutoFit
+Next i
+
+End Sub
+
+Sub Hide_Bad()
+' Loop through each column in the first row of the active sheet
+For i = 1 To WorksheetFunction.CountA(ActiveSheet.Range("1:1"))
+' If the style of the cell in the first row is "Good", then unhide the column
+If ActiveSheet.Cells(1, i).Style = "Good" Then
+ActiveSheet.Columns(i).EntireColumn.Hidden = False
+' If the style of the cell in the first row is not "Good", then hide the column
+Else
+ActiveSheet.Columns(i).EntireColumn.Hidden = True
+End If
+Next i
+End Sub
+
+Sub Hide_Cols_Not_Good()
+
+'This code hides columns in the active sheet that are not marked with the "Good" style. Here's the commented code:
+
+    ' Define a range for the header row containing the column names
+    Dim HeaderRow As Range
+    Set HeaderRow = ActiveSheet.Range("1:" & WorksheetFunction.CountA(ActiveSheet.Range("1:1")))
+    
+    ' Loop through each cell in the header row
+    Dim Cell As Range
+    For Each Cell In HeaderRow
+        
+        ' If the cell has the "Good" style, unhide the column
+        If Cell.Style = "Good" Then
+            Cell.EntireColumn.Hidden = False
+        
+        ' Otherwise, hide the column
+        Else
+            Cell.EntireColumn.Hidden = True
+        End If
+        
+    Next Cell
+
+End Sub
+
+
+Sub Show_Only_Good()
+
+'This code shows only the columns with the "Good" style and hides all other columns in the active worksheet:
+
+    Dim Col As Range
+    Dim Sheet As Range
+    Dim TotalColumns As Long
+    Dim RangeString As String
+
+    TotalColumns = WorksheetFunction.CountA(ActiveSheet.Range("1:1"))
+    TotalRows = WorksheetFunction.CountA(ActiveSheet.Range("A:A"))
+
+    Set Sheet = ActiveSheet.Range(ActiveSheet.Cells(1, 1), ActiveSheet.Cells(1, TotalColumns))
+    RangeString = Sheet.Address
+
+    ' Select the header row
+    Sheet.Select
+
+    For Each Col In Sheet
+        If Col.Style = "Good" Then
+            ' Show columns with "Good" style
+            Col.EntireColumn.Hidden = False
+        Else
+            ' Hide columns without "Good" style
+            Col.EntireColumn.Hidden = True
+        End If
+    Next Col
+
+End Sub
+
+Sub File_Path()
+'This code simply adds the file path of the active workbook to the currently selected cell.
+ActiveCell.Value = ActiveWorkbook.FullName
+End Sub
+
+Sub File_Directory()
+
+'The code takes the file name of the active workbook and extracts the directory path by finding the last occurrence of the "" character and taking everything before it. It does this by looping through the file name string backwards and using the Mid function to look at each character. When it finds the last occurrence of "", it uses the Left function to return everything before that position and sets the value of the active cell to that directory path.
+
+Sub File_Directory()
+
+Dim FileStringLen As Integer
+Dim String_1 As String
+Dim String_2 As String
+Dim FileDir As String
+Dim Last_Occurance As Long
+Dim Test_Var As String
+
+'Get the length of the file name string
+FileStringLen = Len(ActiveWorkbook.FullName)
+
+'Store the file name in a variable
+String_1 = ActiveWorkbook.FullName
+
+'Set the string delimiter to ""
+String_2 = "\"
+
+'Loop through the file name string backwards and find the last occurrence of ""
+For i = FileStringLen To 1 Step -1
+Test_Var = Mid(String_1, i - 1, 1)
+If Mid(String_1, i - 1, 1) = String_2 Then
+Last_Occurance = i
+Exit For
+Else
+End If
+Next i
+
+'Set the cell value to the file directory (everything before the last occurrence of "")
+ActiveCell.Value = Left(ActiveWorkbook.FullName, Last_Occurance - 1)
+
+End Sub
+
+End Sub
+
+Function LastPosition(rCell As String, rChar As String)
+'This function gives the last position of the specified character
+'This code has been developed by Sumit Bansal (https://trumpexcel.com)
+Dim rLen As Integer
+rLen = Len(rCell)
+For i = rLen To 1 Step -1
+If Mid(rCell, i - 1, 1) = rChar Then
+ LastPosition = i
+ Exit Function
+End If
+Next i
+End Function
+
+Sub Trim_Access_Data()
+'The code Trim_Access_Data trims whitespace from all cells in the active worksheet that do not contain formulas.
+
+Sub Trim_Access_Data()
+    ' Loop through each cell in the used range of the active worksheet
+    Dim Cell As Range
+    For Each Cell In ActiveSheet.UsedRange
+        ' Check if the cell contains a formula
+        If Not Cell.HasFormula Then
+            ' If the cell doesn't contain a formula, trim the value and overwrite it
+            Cell.Value = CleanString(Cell.Value)
+        End If
+    Next Cell
+End Sub
+
+
+Function CleanString(StrIn As String) As String
+' "Cleans" a string by removing embedded control (non-printable)
+' characters, including carriage returns and linefeeds.
+' Does not remove special characters like symbols, international
+' characters, etc. This function runs recursively, each call
+' removing one embedded character
+Dim iCh As Integer
+CleanString = StrIn
+For iCh = 1 To Len(StrIn)
+If Asc(Mid(StrIn, iCh, 1)) < 32 Then
+'remove special character
+CleanString = Left(StrIn, iCh - 1) & CleanString(Mid(StrIn, iCh + 1))
+Exit Function
+End If
+Next iCh
+End Function
+
+Private Sub Workbook_Open()
+
+
+Dim Sheet As Worksheet
+Dim Workbook As Workbook
+Dim WorksheetCount As Integer
+
+
+Set Workbook = ActiveWorkbook
+WorksheetCount = Workbook.Worksheets.Count
+
+For i = 1 To WorksheetCount
+    Sheets(i).Columns.AutoFit
+    Sheets(i).Rows.AutoFit
+    Next i
+
+
+
+
+End Sub
+
+Sub Delete_Empty_Columns()
+Dim LastRow As Long
+Dim LastCol As Long
+Dim i As Integer
+Dim Rng As Range
+Dim Col As Range
+
+' Loop through each column in the header row
+For i = 1 To WorksheetFunction.CountA(ActiveSheet.Range("1:1"))
+    
+    ' Check if the column is empty
+    If WorksheetFunction.CountA(ActiveSheet.Columns(i)) = 1 Then
+        
+        ' Delete the column and adjust the counter variable to account for the deleted column
+        ActiveSheet.Columns(i).EntireColumn.Delete
+        i = i - 1
+    Else
+    End If
+Next i
+
+
+End Sub
+
+Sub Highlight_Row_Good()
+' This macro highlights the active row starting from the active cell to the last column of the row with the "Good" cell style.
+
+Dim ThisWS As Worksheet
+Dim ActiveRow As Long
+Dim LastCol As Long
+Dim Rng1 As Range
+Dim Rng2 As Range
+
+Set ThisWS = ActiveSheet
+ActiveRow = ActiveCell.Row
+LastCol = WorksheetFunction.CountA(ThisWS.Range(ActiveRow & ":" & ActiveRow))
+
+Set Rng1 = ThisWS.Range(ActiveCell.Address)
+Set Rng2 = Rng1.Offset(0, LastCol)
+Range(Rng1, Rng2).Style = "Good"
+
+End Sub
+
+Sub Paypal_Formating()
+
+    ' Define variables
+    Dim PaypalData As Worksheet
+    Dim Header_Row As Long
+    Dim Current_Header As String
+    
+    ' Set PaypalData as the active worksheet
+    Set PaypalData = ActiveSheet
+    
+    ' Loop through all columns in the first row of PaypalData
+    For i = 1 To WorksheetFunction.CountA(PaypalData.Range("1:1"))
+        
+        ' Check if the column header contains specific keywords
+        If InStr(PaypalData.Cells(1, i).Value, "Date") > 0 _
+        Or InStr(PaypalData.Cells(1, i).Value, "Name") > 0 _
+        Or InStr(PaypalData.Cells(1, i).Value, "Type") > 0 _
+        Or InStr(PaypalData.Cells(1, i).Value, "Status") > 0 _
+        Or InStr(PaypalData.Cells(1, i).Value, "Currency") > 0 _
+        Or InStr(PaypalData.Cells(1, i).Value, "Gross") > 0 _
+        Or InStr(PaypalData.Cells(1, i).Value, "Fee") > 0 _
+        Or InStr(PaypalData.Cells(1, i).Value, "Net") > 0 _
+        Or InStr(PaypalData.Cells(1, i).Value, "Transaction ID") > 0 _
+        Or InStr(PaypalData.Cells(1, i).Value, "Shipping and Handling Amount") > 0 _
+        Or InStr(PaypalData.Cells(1, i).Value, "Sales Tax") > 0 _
+        Or InStr(PaypalData.Cells(1, i).Value, "Reference Txn ID") > 0 _
+        Or InStr(PaypalData.Cells(1, i).Value, "Invoice Number") > 0 Then
+        ' If the header contains one of the specified keywords, do nothing
+        
+        Else
+            ' If the header does not contain any of the specified keywords
+            
+            ' Check if the header is empty
+            If PaypalData.Cells(1, i).Value = "" Then
+                ' If the header is empty, do nothing
+            Else
+                ' If the header is not empty, delete the entire column
+                Columns(i).EntireColumn.Delete
+                i = i - 1 ' Decrement i to account for the deleted column
+            End If
+        End If
+    Next i
+    
+    ' Autofit all columns in PaypalData
+    PaypalData.Columns.AutoFit
+    
+End Sub
+
+
+Sub Checknumber_Automation()
+
+    Dim DateCol As Long
+    Dim LastCol As Long
+    Dim CheckNoCol As Long
+    
+    'Get the last column index
+    LastCol = WorksheetFunction.CountA(ActiveSheet.Range("1:1"))
+    
+    'Add a new column for check numbers
+    CheckNoCol = LastCol + 1
+    
+    'Get the column index for the "DepositDate" column
+    DateCol = ActiveSheet.Cells.Find("DepositDate").Column
+    
+    'Generate check numbers for each row based on the value in column B and the date in the "DepositDate" column
+    For i = 2 To WorksheetFunction.CountA(ActiveSheet.Columns(DateCol))
+        ActiveSheet.Cells(i, CheckNoCol).Value = ActiveSheet.Range("B" & i).Value & Format(ActiveSheet.Cells(i, DateCol).Value, "mmddyyyy")
+    Next i
+
+End Sub
+
+
+
+Sub Insert_Blank_Rows()
+    
+    Dim Current_Selection As Range
+    Dim RowCount As Long
+    Dim LoopRange As Range
+    Dim Helpersheet As Worksheet
+    Dim Counter As Integer
+    
+    Set Current_Selection = Selection
+    
+    ' Add a new worksheet to be used as a helper sheet
+    Set Helpersheet = Sheets.Add
+    
+    ' Counter to keep track of the number of rows added so far
+    Counter = 0
+    
+    ' Loop through each cell in the selected range
+    For Each LoopRange In Current_Selection
+        LoopRange.EntireRow.Copy
+        
+        ' Get the row count of the helper sheet and calculate the row number for the new row
+        RowCount = WorksheetFunction.CountA(Helpersheet.Range("A:A"))
+        If RowCount = 0 Then
+            RowCount = 1
+            Counter = 0
+        Else
+            Counter = Counter + 1
+            RowCount = WorksheetFunction.CountA(Helpersheet.Range("A:A")) + Counter + 1
+        End If
+        
+        ' Paste the copied row into the helper sheet and adjust the values in some columns
+        Helpersheet.Range("A" & RowCount).PasteSpecial (xlPasteAll)
+        Helpersheet.Range("C" & RowCount + 1).Value = Helpersheet.Range("G" & RowCount).Value
+        Helpersheet.Range("F" & RowCount + 1).Value = Helpersheet.Range("F" & RowCount).Value
+        Helpersheet.Range("A" & RowCount + 1).Value = "L"
+    Next LoopRange
+    
+End Sub
+
+
+Sub Format_AP_Trial_Balance()
+
+' Define variables for data range and last column
+Dim DataRangeA As Long
+Dim DataRangeB As Long
+Dim LastCol As Long
+
+' Unmerge all cells and autofit columns for the entire used range
+ActiveSheet.UsedRange.Select
+Selection.UnMerge
+Selection.Columns.AutoFit
+
+' Define data range by finding start and end rows
+DataRangeA = ActiveSheet.Cells.Find("Invoice Amount", After:=ActiveSheet.Range("A1")).Row + 3
+DataRangeB = ActiveSheet.Cells.Find("Report Totals:", After:=ActiveSheet.Range("A1")).Row - 2
+
+' Fill in any blank invoice numbers with the value from the cell above
+For i = DataRangeA To DataRangeB
+If IsEmpty(ActiveSheet.Range("A" & i).Value) = True Then
+ActiveSheet.Range("A" & i).Value = ActiveSheet.Range("A" & i - 1).Value
+End If
+Next i
+
+' Delete rows where there is no data in the "Description" column
+For i = DataRangeA To DataRangeB - 2
+If IsEmpty(ActiveSheet.Range("D" & i).Value) = True And IsEmpty(ActiveSheet.Range("A" & i).Value) = False Then
+ActiveSheet.Range("A" & i).EntireRow.Delete
+On Error Resume Next
+DataRangeB = ActiveSheet.Cells.Find("Report Totals:", After:=ActiveSheet.Range("A1")).Row - 3
+End If
+Next i
+
+' Delete rows with specific values in the "Vendor" column
+DataRangeB = WorksheetFunction.CountA(ActiveSheet.Range("A:A"))
+For i = DataRangeA To DataRangeB
+If InStr(ActiveSheet.Range("A" & i).Value, "Vendor/") <> 0 Then
+ActiveSheet.Range("A" & i).EntireRow.Delete
+End If
+Next i
+
+' Delete rows with specific values in the "Description" column
+DataRangeB = WorksheetFunction.CountA(ActiveSheet.Range("A:A"))
+For i = DataRangeA To DataRangeB
+If InStr(ActiveSheet.Range("A" & i).Value, "AMEXBL1 American Express Blue Card") <> 0 Then
+ActiveSheet.Range("A" & i).EntireRow.Delete
+End If
+Next i
+
+' Rename columns
+ActiveSheet.Range("A" & DataRangeA - 1).Value = "Invoice Number"
+ActiveSheet.Range("D" & DataRangeA - 1).Value = "Invoice Date"
+ActiveSheet.Range("E" & DataRangeA - 1).Value = "Invoice Due Date"
+ActiveSheet.Range("L" & DataRangeA - 1).Value = "Hold"
+ActiveSheet.Range("N" & DataRangeA - 1).Value = "Invoice Amount"
+ActiveSheet.Range("U" & DataRangeA - 1).Value = "Discount Amount"
+ActiveSheet.Range("AA" & DataRangeA - 1).Value = "Invoice Balance"
+
+' Delete unnecessary columns
+ActiveSheet.Range("AC:AQ").EntireColumn.Delete
+ActiveSheet.Range("B:C").EntireColumn.Delete
+ActiveSheet.Range("D:I").EntireColumn.Delete
+ActiveSheet.Range("G:L").EntireColumn.Delete
+ActiveSheet.Range("H:L").EntireColumn.Delete
+
+' Autofit columns and rows and adjust font size and style
+ActiveSheet.Columns.AutoFit
+ActiveSheet.Rows.AutoFit
+ActiveSheet.Range("A" & DataRangeA - 1 & ":H" & DataRangeB).Font.Size = 12
+ActiveSheet.Columns.AutoFit
+ActiveSheet.Rows.AutoFit
+ActiveSheet.Rows(5).Entire
+
+Sub Fix_Sage_Negatives()
+' Declare variables
+Dim Rng As Range
+Dim Cell As Range
+
+' Get the selected range
+Set Rng = Selection
+
+' Loop through each cell in the selected range
+For Each Cell In Rng
+    ' Check if the cell value contains a negative sign
+    If InStr(Cell.Value, "-") <> 0 Then
+        ' Remove any leading/trailing spaces from the cell value
+        Cell.Value = Trim(Cell.Value)
+        ' Convert the negative value to a positive value
+        Cell.Value = -1 * Left(Cell.Value, WorksheetFunction.Find("-", Cell.Value) - 1)
+    Else
+    End If
+Next Cell
+
+End Sub
+
+
+
